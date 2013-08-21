@@ -1,12 +1,11 @@
-package com.clarifi.reporting
-package ermine
+package scala-parsers
 
-import Document.{ text }
+import parsing.Document.{ text }
 import scalaz._
 import scalaz.Free.{ Return, suspend }
 import scalaz.Scalaz._
 import scala.collection.immutable.List
-import com.clarifi.reporting.ermine.Diagnostic._
+import parsing.Diagnostic._
 import java.lang.Character._
 import Ordering._
 

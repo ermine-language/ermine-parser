@@ -1,4 +1,4 @@
-package com.clarifi.reporting.ermine
+package scala-parsers.parsing
 
 sealed abstract class Result[+S,+A] extends Functorial[({type F[+X] = Result[S,X]})#F,A] {
   def self = this

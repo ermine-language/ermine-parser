@@ -1,4 +1,4 @@
-package com.clarifi.reporting.ermine
+package scala-parsers.parsing
 
 object ++ {
   def unapply[A,B](p: (A,B)) = Some(p)

@@ -1,13 +1,13 @@
-package com.clarifi.reporting.ermine.parsing
+package scala-parsers.parsing
 
-import com.clarifi.reporting.ermine._
+import scala-parsers.parsing._
 
 import scala.collection.immutable.List
 import scala.collection.immutable.TreeSet
 import scalaz.{ Name => _, _ }
 import scalaz.Scalaz._
 import scalaz.Lens._
-import com.clarifi.reporting.ermine.syntax.{Renaming, Single, Explicit}
+import scala-parsers.parsing.syntax.{Renaming, Single, Explicit}
 
 /** Used to track the current indentation level
   *

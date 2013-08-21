@@ -1,4 +1,4 @@
-package com.clarifi.reporting.ermine
+package scala-parsers.parsing
 
 import scalaz._
 import scalaz.Scalaz._

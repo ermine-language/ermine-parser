@@ -1,4 +1,4 @@
-package com.clarifi.reporting.ermine
+package scala-parsers.parsing
 
 import java.io.Writer
 import java.io.StringWriter

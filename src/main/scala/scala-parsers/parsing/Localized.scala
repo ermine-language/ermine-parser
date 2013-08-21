@@ -1,8 +1,8 @@
-package com.clarifi.reporting.ermine.parsing
+package scala-parsers.parsing
 
-import com.clarifi.reporting.ermine.{ Comonadic, Applied, Local, Pos, Diagnostic }
-import com.clarifi.reporting.ermine.Diagnostic._
-import com.clarifi.reporting.ermine.Document.text
+import scala-parsers.parsing.{ Comonadic, Applied, Local, Pos, Diagnostic }
+import scala-parsers.parsing.Diagnostic._
+import scala-parsers.parsing.Document.text
 import scala.collection.immutable.List
 import scalaz.{ Name => _, Arrow => _, Free => _, Forall => _, _ }
 import Scalaz._

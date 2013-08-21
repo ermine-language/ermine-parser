@@ -1,7 +1,7 @@
-package com.clarifi.reporting.ermine.parsing
+package scala-parsers.parsing
 
-import com.clarifi.reporting.ermine.Diagnostic._
-import com.clarifi.reporting.ermine.{ die => _, _ }
+import scala-parsers.parsing.Diagnostic._
+import scala-parsers.parsing.{ die => _, _ }
 import scalaz.Ordering
 import scalaz.Scalaz._
 import scalaz.Ordering.{LT, GT, EQ}

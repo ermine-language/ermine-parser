@@ -1,4 +1,4 @@
-package com.clarifi.reporting.ermine
+package scala-parsers.parsing
 
 sealed trait Assoc
 case object AssocL extends Assoc

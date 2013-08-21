@@ -1,4 +1,4 @@
-package com.clarifi.reporting.ermine.parsing
+package scala-parsers.parsing
 
 /** Tokens are returned by the layout parser rather than raw characters
   *

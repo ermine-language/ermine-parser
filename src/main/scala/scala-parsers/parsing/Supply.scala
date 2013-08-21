@@ -1,4 +1,4 @@
-package com.clarifi.reporting
+package scala-parsers.parsing
 
 object Supply {
   val minSplitSupplySize = 32

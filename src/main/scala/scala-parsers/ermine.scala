@@ -1,6 +1,6 @@
-package com.clarifi.reporting
+package scala-parsers
 
-import com.clarifi.reporting.ermine.{ Relocatable, Located, Loc }
+import parsing.{ Relocatable, Located, Loc }
 import scalaz.{ Lens }
 import scala.collection.immutable.List
 import Lens._

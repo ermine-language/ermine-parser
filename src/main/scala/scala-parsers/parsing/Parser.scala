@@ -1,10 +1,10 @@
-package com.clarifi.reporting
-package ermine.parsing
+package scala-parsers
+package parsing
 
-import com.clarifi.reporting.ermine.MonadicPlus
+import scala-parsers.parsing.MonadicPlus
 
-import com.clarifi.reporting.ermine.Document
-import com.clarifi.reporting.ermine.Document.{ text, fillSep }
+import scala-parsers.parsing.Document
+import scala-parsers.parsing.Document.{ text, fillSep }
 
 import scala.collection.immutable.List
 import scalaz.{ Monad }

@@ -1,8 +1,8 @@
-package com.clarifi.reporting.ermine.parsing
+package scala-parsers.parsing
 
-import com.clarifi.reporting.ermine.{ Functorial, AppliedOnce, Comonadic }
-import com.clarifi.reporting.ermine.{ Pos, Document, Located }
-import com.clarifi.reporting.ermine.Document.{ fillSep, text, punctuate, nest, line, oxford }
+import scala-parsers.parsing.{ Functorial, AppliedOnce, Comonadic }
+import scala-parsers.parsing.{ Pos, Document, Located }
+import scala-parsers.parsing.Document.{ fillSep, text, punctuate, nest, line, oxford }
 import scala.collection.immutable.List
 import scalaz.Functor
 
