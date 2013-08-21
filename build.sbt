@@ -1,14 +1,10 @@
-name := "ermine-legacy"
-
-organization := "com.clarifi"
+name := "scala-parsers"
 
 version := "0.1"
 
 scalaVersion := "2.10.2"
 
-crossScalaVersions := Seq("2.10.2")
-
-description := "Legacy Ermine Type Checker and Interpreter in Scala."
+description := "A Trifecta inspired parser in Scala."
 
 licenses += ("BSD Simplified", url("https://github.com/ermine-language/ermine-legacy/blob/master/LICENSE"))
 
@@ -66,12 +62,6 @@ libraryDependencies ++= Seq(
   "org.scalaz" %% "scalaz-iterv" % "7.0.2",
   "org.scalaz" %% "scalaz-scalacheck-binding" % "7.0.2" % "test",
   "machines"   %% "machines" % "1.0",
-  //"org.scala-lang" % "jline" % "2.10.2",
-  "jline" % "jline" % "0.9.91",
   "log4j" % "log4j" % "1.2.14",
-  "net.sourceforge.jtds" % "jtds" % "1.3.1",
-  "org.xerial" % "sqlite-jdbc" % "3.7.2",
-  "mysql" % "mysql-connector-java" % "5.1.6",
-  "postgresql" % "postgresql" % "9.1-901-1.jdbc4",
   "org.scalacheck" %% "scalacheck" % "1.10.0" % "test"
 )

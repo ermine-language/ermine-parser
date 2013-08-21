@@ -3,15 +3,9 @@ package com.clarifi.reporting.project
 import sbt._
 import Keys._
 
-object ErmineBuild extends Build {
+object ParserBuild extends Build {
   val allUnmanagedResourceDirectories = SettingKey[Seq[File]]("all-unmanaged-resource-directories", "unmanaged-resource-directories, transitively.")
   val getLibraryPath      = TaskKey[Unit]("get-library-path", "Gets the java.library.path environment variable")
-  val main                = InputKey[Unit]("main", "Run the test Main class")
-  val editor              = InputKey[Unit]("editor", "Run the Ermine Editor")
-  val repl                = InputKey[Unit]("repl", "Run the Ermine read-eval-print loop")
-
-  lazy val ermine = Project( id = "ermine" , base = file("."), settings = projectSettings :+
-    fullRunInputTask(repl, Compile, "com.clarifi.reporting.ermine.session.Console"))
 
   private lazy val projectSettings =
     Defaults.defaultSettings ++ Seq[SettingsDefinition](
