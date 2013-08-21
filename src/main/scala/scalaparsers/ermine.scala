@@ -1,4 +1,4 @@
-package scala-parsers
+package scalaparsers
 
 import parsing.{ Relocatable, Located, Loc }
 import scalaz.{ Lens }

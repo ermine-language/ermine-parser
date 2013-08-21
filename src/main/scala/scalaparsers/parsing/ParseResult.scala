@@ -1,8 +1,8 @@
-package scala-parsers.parsing
+package scalaparsers.parsing
 
-import scala-parsers.parsing.{ Functorial, AppliedOnce, Comonadic }
-import scala-parsers.parsing.{ Pos, Document, Located }
-import scala-parsers.parsing.Document.{ fillSep, text, punctuate, nest, line, oxford }
+import scalaparsers.parsing.{ Functorial, AppliedOnce, Comonadic }
+import scalaparsers.parsing.{ Pos, Document, Located }
+import scalaparsers.parsing.Document.{ fillSep, text, punctuate, nest, line, oxford }
 import scala.collection.immutable.List
 import scalaz.Functor
 

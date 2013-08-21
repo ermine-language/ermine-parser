@@ -1,4 +1,4 @@
-package scala-parsers.parsing
+package scalaparsers.parsing
 
 sealed trait Assoc
 case object AssocL extends Assoc

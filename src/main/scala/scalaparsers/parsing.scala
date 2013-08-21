@@ -1,4 +1,4 @@
-package scala-parsers
+package scalaparsers
 
 import parsing.Document.{ text }
 import scalaz._

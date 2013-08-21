@@ -1,4 +1,4 @@
-package scala-parsers.parsing
+package scalaparsers.parsing
 
 sealed abstract class Result[+S,+A] extends Functorial[({type F[+X] = Result[S,X]})#F,A] {
   def self = this

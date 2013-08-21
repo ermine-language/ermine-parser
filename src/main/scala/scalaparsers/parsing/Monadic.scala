@@ -1,4 +1,4 @@
-package scala-parsers.parsing
+package scalaparsers.parsing
 
 object ++ {
   def unapply[A,B](p: (A,B)) = Some(p)

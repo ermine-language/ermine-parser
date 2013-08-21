@@ -1,13 +1,13 @@
-package scala-parsers.parsing
+package scalaparsers.parsing
 
-import scala-parsers.parsing._
+import scalaparsers.parsing._
 
 import scala.collection.immutable.List
 import scala.collection.immutable.TreeSet
 import scalaz.{ Name => _, _ }
 import scalaz.Scalaz._
 import scalaz.Lens._
-import scala-parsers.parsing.syntax.{Renaming, Single, Explicit}
+import scalaparsers.parsing.syntax.{Renaming, Single, Explicit}
 
 /** Used to track the current indentation level
   *

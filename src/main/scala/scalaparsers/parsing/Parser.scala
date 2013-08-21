@@ -1,10 +1,10 @@
-package scala-parsers
+package scalaparsers
 package parsing
 
-import scala-parsers.parsing.MonadicPlus
+import scalaparsers.parsing.MonadicPlus
 
-import scala-parsers.parsing.Document
-import scala-parsers.parsing.Document.{ text, fillSep }
+import scalaparsers.parsing.Document
+import scalaparsers.parsing.Document.{ text, fillSep }
 
 import scala.collection.immutable.List
 import scalaz.{ Monad }

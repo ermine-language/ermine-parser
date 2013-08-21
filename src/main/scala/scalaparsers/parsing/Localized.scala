@@ -1,8 +1,8 @@
-package scala-parsers.parsing
+package scalaparsers.parsing
 
-import scala-parsers.parsing.{ Comonadic, Applied, Local, Pos, Diagnostic }
-import scala-parsers.parsing.Diagnostic._
-import scala-parsers.parsing.Document.text
+import scalaparsers.parsing.{ Comonadic, Applied, Local, Pos, Diagnostic }
+import scalaparsers.parsing.Diagnostic._
+import scalaparsers.parsing.Document.text
 import scala.collection.immutable.List
 import scalaz.{ Name => _, Arrow => _, Free => _, Forall => _, _ }
 import Scalaz._

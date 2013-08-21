@@ -1,7 +1,7 @@
-package scala-parsers.parsing
+package scalaparsers.parsing
 
-import scala-parsers.parsing.Diagnostic._
-import scala-parsers.parsing.{ die => _, _ }
+import scalaparsers.parsing.Diagnostic._
+import scalaparsers.parsing.{ die => _, _ }
 import scalaz.Ordering
 import scalaz.Scalaz._
 import scalaz.Ordering.{LT, GT, EQ}
