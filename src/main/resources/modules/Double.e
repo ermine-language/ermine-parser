@@ -1,2 +1,0 @@
-module Double where
-
