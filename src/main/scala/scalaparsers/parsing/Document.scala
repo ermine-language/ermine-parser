@@ -5,6 +5,8 @@ import java.io.StringWriter
 import scalaz._
 import scalaz.Scalaz._
 
+case class Death(error: Document, base: Exception = null) extends Exception(error.toString, base)
+
 abstract class DocException(msg: String, val doc: Document) extends Exception(msg)
 
 case object DocNil extends Document
