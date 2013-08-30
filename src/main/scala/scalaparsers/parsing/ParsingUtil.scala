@@ -1,23 +1,19 @@
-package scalaparsers
+package scalaparsers.parsing
 
-import parsing.Document.{ text }
+import Document.{ text }
 import scalaz._
 import scalaz.Free.{ Return, suspend }
 import scalaz.Scalaz._
 import scala.collection.immutable.List
-import parsing.Diagnostic._
+import Diagnostic._
 import java.lang.Character._
 import Ordering._
 
-import parsing.{ Relocatable, Located, Loc }
-import scalaz.{ Lens }
-import scala.collection.immutable.List
-import Lens._
 import java.util.TimeZone
 
-package object parsing {
+object ParsingUtil {
   def unit[A](a: A): Parser[A] = new Parser[A] {
-    def apply(s: ParseState, vs: Supply) = suspend(Return(Pure(a)))
+    def apply[S](s: ParseState[S], vs: Supply) = suspend(Return(Pure(a)))
     override def map[B](f: A => B) = unit(f(a))
     override def flatMap[B](f: A => Parser[B]) = f(a)
   }
@@ -34,19 +30,19 @@ package object parsing {
 
   implicit def parserMonad: Monad[Parser] = new Monad[Parser] {
     def point[A](a: => A) = new Parser[A] {
-      def apply(s: ParseState, vs: Supply) = suspend(Return(Pure(a)))
+      def apply(s: ParseState[S], vs: Supply) = suspend(Return(Pure(a)))
       override def map[B](f : A => B) = pure(f(a))
     }
     override def map[A,B](m: Parser[A])(f: A => B) = m map f
     def bind[A,B](m: Parser[A])(f: A => Parser[B]) = m flatMap f
   }
 
-  def get: Parser[ParseState] = Parser((s, _) => Pure(s))
-  def gets[A](f: ParseState => A): Parser[A] = Parser((s,_) => Pure(f(s)))
-  def getSupply: Parser[Supply] = Parser((_, vs) => Pure(vs))
+  def get[S]: Parser[ParseState[S]] = Parser((s, _) => Pure(s))
+  def gets[A, S](f: ParseState[S] => A): Parser[A] = Parser((s,_) => Pure(f(s)))
+  def getSupply[S]: Parser[Supply] = Parser((_, vs) => Pure(vs))
   def loc: Parser[Pos] = Parser((s, _) => Pure(s.loc))
-  def modify(f: ParseState => ParseState) = Parser((s,_) => Commit(f(s),(), Set()))
-  def put(s: ParseState) = Parser((_,_) => Commit(s,(),Set()))
+  def modify[S](f: ParseState[S] => ParseState[S]) = Parser((s,_) => Commit(f(s),(), Set()))
+  def put[S](s: ParseState[S]) = Parser((_,_) => Commit(s,(),Set()))
   def freshId = Parser((_,vs) => Pure(vs.fresh))
   def rawSatisfy(p: Char => Boolean) = Parser((s, _) => {
     val si = s.input
@@ -209,8 +205,8 @@ package object parsing {
     )
   } yield ()
 
-  def leftLet      = left(keyword("let"),"let", rawKeyword("in"), "in")
-  def leftCase     = left(keyword("case"),"case", rawKeyword("of"), "of")
+  //def leftLet      = left(keyword("let"),"let", rawKeyword("in"), "in")
+  //def leftCase     = left(keyword("case"),"case", rawKeyword("of"), "of")
   def leftToken(ld: String, rd: String) = left(token(ld), "'" + ld + "'", rawWord(rd), "'" + rd + "'")
   def leftBrace    = leftToken("{","}")
   def leftCurlyBanana = leftToken("{|","|}")
@@ -325,22 +321,13 @@ package object parsing {
   val opChars = ":!#$%&*+./<=>?@\\^|-~'`".sorted.toArray[Char]
   def existsIn(chs: Array[Char], c: Char): Boolean =
     java.util.Arrays.binarySearch(chs, c) >= 0
-  def isOpChar(c: Char) =
-    existsIn(opChars, c) ||
-    (!existsIn(nonopChars, c) && punctClasses(c.getType.asInstanceOf[Byte]))
-
+//  def isOpChar(c: Char) =
+//    existsIn(opChars, c) ||
+//    (!existsIn(nonopChars, c) && punctClasses(c.getType.asInstanceOf[Byte]))
+  /*
   def opChar: Parser[Char] = satisfy(isOpChar(_))
   def keyword(s: String): Parser[Unit] = token((letter >> identTail).slice.filter(_ == s).skip.attempt(s))
   def rawKeyword(s: String): Parser[Unit] = (stillOnside >> rawLetter >> rawIdentTail).slice.filter(_ == s).skip.attempt("raw " + s)
-
-  // keywords which cannot be used as identifiers
-  val unusedKeywords   = Set("subtype")
-  val otherKeywords    = Set("exists", "constructor", "do", "forall", "phi", "φ", "prj#", "rho", "ρ", "constraint", "Γ", "table", "where", "infixr", "infixl", "infix", "postfix", "prefix", "case", "let", "in", "of", "esac", "subtype", "hole", "Eval")
-  val startingKeywords = Set("private", "abstract", "field", "data", "foreign", "type", "import", "export", "database","class","instance")
-  val keywords = startingKeywords ++ otherKeywords ++ unusedKeywords
-  val field      = keyword("φ") | keyword("phi")
-  val constraint = keyword("Γ") | keyword("constraint")
-  val rhoS       = keyword("ρ") | keyword("rho")
 
   private val punctClasses = Set(
     START_PUNCTUATION, END_PUNCTUATION, DASH_PUNCTUATION,
@@ -364,53 +351,5 @@ package object parsing {
   val comma       = token(ch(',')) as ","
   def prec: Parser[Int] = nat.filter(_ <= 10L).map(_.toInt) scope "precedence between 0 and 10"
   def underscore: Parser[Unit] = token((ch('_') >> notFollowedBy(tailChar)) attempt "underscore")
-
-
-  def setLoc[T<:Located](t: T, l: Loc)(implicit T:Relocatable[T]) = T.setLoc(t,l)
-  def location[T <: Located](implicit T:Relocatable[T]) = lensu[T,Loc]((s, u) => T.setLoc(s, u), _.loc)
-
-  def skip[T[+_]](p:Functorial[T,Any]): T[Unit] = p as ()
-  def as[T[+_],A](p:Functorial[T,Any], a: A): T[A] = p as a
-  def filterMap[T[+_],A,B](p: Filtered[T,A])(f: A => Option[B]): T[B] = p filterMap f
-  def many1[T[+_],A](p: Alternating[T,A]): T[List[A]] = p some // can't use some!
-  def skipSome[T[+_]](p:Alternating[T,Any]): T[Unit] = p skipSome
-  def many[T[+_],A](p: Alternating[T,A]): T[List[A]] = p many
-  def skipMany[T[+_]](p:Alternating[T,Any]): T[Unit] = p skipMany
-  def manyTill[T[+_],A](p: Alternating[T,A], end: T[Any]) = p manyTill end
-  def skipManyTill[T[+_],A](p: Alternating[T,A], end: T[Any]) = p skipManyTill end
-  def sepEndBy[T[+_],A](p: Alternating[T,A], sep: T[Any]) = p sepEndBy sep
-  def skipSepEndBy[T[+_],A](p: Alternating[T,A], sep: T[Any]) = p skipSepEndBy sep
-  def sepEndBy1[T[+_],A](p: Alternating[T,A], sep: T[Any]) = p sepEndBy1 sep
-  def skipSepEndBy1[T[+_],A](p: Alternating[T,A], sep: T[Any]) = p skipSepEndBy1 sep
-  def sepBy[T[+_],A](p: Alternating[T,A], sep: T[Any]) = p sepBy sep
-  def sepBy1[T[+_],A](p: Alternating[T,A], sep: T[Any]) = p sepBy1 sep
-  def skipSepBy[T[+_],A](p: Alternating[T,A], sep: T[Any]) = p sepBy sep
-  def skipSepBy1[T[+_],A](p: Alternating[T,A], sep: T[Any]) = p sepBy1 sep
-  def chainr[T[+_],A](p: Alternating[T,A])(op: T[(A,A) => A]) = p chainr op
-  def chainl[T[+_],A](p: Alternating[T,A])(op: T[(A,A) => A]) = p chainl op
-  def endBy[T[+_],A](p: Alternating[T,A], end: T[Any]) = p endBy end
-  def endBy1[T[+_],A](p: Alternating[T,A], end: T[Any]) = p endBy1 end
-  def skipEndBy[T[+_],A](p: Alternating[T,A], end: T[Any]) = p skipEndBy end
-  def skipEndBy1[T[+_],A](p: Alternating[T,A], end: T[Any]) = p skipEndBy1 end
-  def extract[T[+_],A](w: Comonadic[T,A]): A = w.extract
-  def extend[T[+_],A,B](w: Comonadic[T,A])(f: T[A] => B): T[B] = w.extend[B](f)
-  def scope[T[+_],A](w: Scoped[T,A], desc: String): T[A] = w scope desc
-
-  def mapAccum_[S,A](g: S, xs: List[A])(f: (S, A) => S): S = xs match {
-    case List()  => g
-    case a :: as => mapAccum_(f(g,a),as)(f)
-  }
-
-  def mapAccum[S,A,B](g: S, xs: List[A])(f: (S, A) => (S, B)): (S, List[B]) = xs match {
-    case List() => (g, List())
-    case a :: as =>
-      val (gp,b) = f(g,a)
-      val (gpp,bs) = mapAccum(gp, as)(f)
-      (gpp, b :: bs)
-  }
-
-  def die(d: Document) = throw Death(d)
-  // def empty = throw SubstException(None)
+  */
 }
-
-// vim: set ts=4 sw=4 et:

@@ -1,23 +1,21 @@
 package scalaparsers.parsing
 
-import scalaparsers.parsing.{ Functorial, AppliedOnce, Comonadic }
-import scalaparsers.parsing.{ Pos, Document, Located }
 import scalaparsers.parsing.Document.{ fillSep, text, punctuate, nest, line, oxford }
 import scala.collection.immutable.List
 import scalaz.Functor
 
-sealed trait ParseResult[+A] extends Functorial[ParseResult,A] {
+sealed trait ParseResult[S,+A] extends Functorial[ParseResult[S],A] {
   def self = this
 }
 
 object ParseResult {
-  implicit def parseResultFunctor: Functor[ParseResult] = new Functor[ParseResult] {
+  implicit def parseResultFunctor: Functor[ParseResult[S]] = new Functor[ParseResult[S]] {
     def map[A,B](p: ParseResult[A])(f: A => B) = p map f
   }
 }
 
 /** A pure computation that hasn't consumed any input, including a list of options that could have made it eat more */
-case class Pure[+A](extract: A, last: Fail = Fail()) extends ParseResult[A] with Comonadic[Pure, A] {
+case class Pure[+A](extract: A, last: Fail = Fail()) extends ParseResult[Nothing,A] with Comonadic[Pure, A] {
   override def self = this
   def lift[B](b: Pure[B]) = b
   override def map[B](f: A => B) = Pure(f(extract), last)
@@ -26,7 +24,7 @@ case class Pure[+A](extract: A, last: Fail = Fail()) extends ParseResult[A] with
 }
 
 /** A committed computation which ha manipulated the ParseState */
-case class Commit[+A](s: ParseState, extract: A, expected: Set[String]) extends ParseResult[A] with Comonadic[Commit, A] with Located {
+case class Commit[+A,S](s: ParseState[S], extract: A, expected: Set[String]) extends ParseResult[S,A] with Comonadic[Commit, A] with Located {
   override def self = this
   def lift[B](b: Commit[B]) = b
   override def map[B](f: A => B)   = Commit(s, f(extract), expected)
@@ -35,7 +33,7 @@ case class Commit[+A](s: ParseState, extract: A, expected: Set[String]) extends 
   def loc = s.loc
 }
 
-sealed trait ParseFailure extends ParseResult[Nothing] {
+sealed trait ParseFailure extends ParseResult[S,Nothing] {
   override def map[B](f: Nothing => B) = this
   override def as[B](b: => B) = this
 }
