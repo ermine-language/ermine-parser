@@ -1,7 +1,7 @@
 package scalaparsers
-package parsing
 
-import scalaparsers.parsing.Document.{ text, fillSep }
+
+import scalaparsers.Document.{ text, fillSep }
 
 import scala.collection.immutable.List
 import scalaz.{ Monad }

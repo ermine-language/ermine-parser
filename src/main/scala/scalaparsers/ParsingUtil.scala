@@ -1,4 +1,4 @@
-package scalaparsers.parsing
+package scalaparsers
 
 import Document.{ text }
 import scalaz._
@@ -14,8 +14,8 @@ import java.util.TimeZone
 
 trait Parsing[S] {
 
-  type Parser[+A] = scalaparsers.parsing.Parser[S, A]
-  type ParseState = scalaparsers.parsing.ParseState[S]
+  type Parser[+A] = scalaparsers.Parser[S, A]
+  type ParseState = scalaparsers.ParseState[S]
 
   def unit[A](a: A): Parser[A] = new Parser[A] {
     def apply(s: ParseState, vs: Supply) = suspend(Return(Pure(a)))

@@ -1,6 +1,6 @@
-package scalaparsers.parsing
+package scalaparsers
 
-import scalaparsers.parsing.Document.{ fillSep, text, punctuate, nest, line, oxford }
+import scalaparsers.Document.{ fillSep, text, punctuate, nest, line, oxford }
 import scala.collection.immutable.List
 import scalaz.Functor
 

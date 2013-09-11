@@ -1,4 +1,4 @@
-package scalaparsers.parsing
+package scalaparsers
 
 import scalaz._
 import scalaz.Scalaz._

@@ -1,4 +1,4 @@
-package scalaparsers.parsing
+package scalaparsers
 
 object Supply {
   val minSplitSupplySize = 32

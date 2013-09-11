@@ -1,4 +1,4 @@
-package scalaparsers.parsing
+package scalaparsers
 
 import Document._
 import scalaz.{ Order, Ordering }

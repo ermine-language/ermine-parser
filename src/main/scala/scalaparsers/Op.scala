@@ -1,4 +1,4 @@
-package scalaparsers.parsing
+package scalaparsers
 
 import Diagnostic._
 import scalaz.Ordering

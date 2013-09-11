@@ -1,6 +1,6 @@
-package scalaparsers.parsing
+package scalaparsers
 
-import scalaparsers.parsing._
+import scalaparsers._
 
 //import ParsingUtil._
 import scala.collection.immutable.List

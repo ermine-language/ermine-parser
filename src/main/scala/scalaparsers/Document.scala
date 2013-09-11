@@ -1,4 +1,4 @@
-package scalaparsers.parsing
+package scalaparsers
 
 import java.io.Writer
 import java.io.StringWriter

@@ -1,4 +1,4 @@
-package scalaparsers.parsing
+package scalaparsers
 
 /** Tokens are returned by the layout parser rather than raw characters
   *
