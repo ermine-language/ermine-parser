@@ -1,11 +1,10 @@
 package scalaparsers.parsing
 
 import Diagnostic._
-import ParsingUtil._
 import scalaz.Ordering
 import scalaz.Scalaz._
 import scalaz.Ordering.{LT, GT, EQ}
-
+/*
 sealed trait Op[T] extends Located {
   def loc: Pos
   def prec: Int
@@ -65,6 +64,9 @@ object Op {
       inpost.flatMap(clear(l, _, rators, rands)) |
       finish(l, rators, rands)
 
-    loc.flatMap(postRator(_, List(), List()))
+    loc.
+    flatMap(postRator(_, List(), List()))
   }
+
 }
+*/

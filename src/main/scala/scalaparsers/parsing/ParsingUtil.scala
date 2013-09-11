@@ -8,12 +8,17 @@ import scala.collection.immutable.List
 import Diagnostic._
 import java.lang.Character._
 import Ordering._
+import scalaz.Ordering.{LT, GT, EQ}
 
 import java.util.TimeZone
 
-object ParsingUtil {
+trait Parsing[S] {
+
+  type Parser[+A] = scalaparsers.parsing.Parser[S, A]
+  type ParseState = scalaparsers.parsing.ParseState[S]
+
   def unit[A](a: A): Parser[A] = new Parser[A] {
-    def apply[S](s: ParseState[S], vs: Supply) = suspend(Return(Pure(a)))
+    def apply(s: ParseState, vs: Supply) = suspend(Return(Pure(a)))
     override def map[B](f: A => B) = unit(f(a))
     override def flatMap[B](f: A => Parser[B]) = f(a)
   }
@@ -25,26 +30,26 @@ object ParsingUtil {
       err
     })
     def fail(msg: Document) = Parser((_,_) => Fail(Some(msg), List(), Set()))
-    def empty = Parser((_,_) => Fail(None, List(), Set()))
+    def empty = Parser((_:ParseState,_:Supply) => Fail(None, List(), Set()))
   }
 
   implicit def parserMonad: Monad[Parser] = new Monad[Parser] {
     def point[A](a: => A) = new Parser[A] {
-      def apply(s: ParseState[S], vs: Supply) = suspend(Return(Pure(a)))
+      def apply(s: ParseState, vs: Supply) = suspend(Return(Pure(a)))
       override def map[B](f : A => B) = pure(f(a))
     }
     override def map[A,B](m: Parser[A])(f: A => B) = m map f
     def bind[A,B](m: Parser[A])(f: A => Parser[B]) = m flatMap f
   }
 
-  def get[S]: Parser[ParseState[S]] = Parser((s, _) => Pure(s))
-  def gets[A, S](f: ParseState[S] => A): Parser[A] = Parser((s,_) => Pure(f(s)))
-  def getSupply[S]: Parser[Supply] = Parser((_, vs) => Pure(vs))
-  def loc: Parser[Pos] = Parser((s, _) => Pure(s.loc))
-  def modify[S](f: ParseState[S] => ParseState[S]) = Parser((s,_) => Commit(f(s),(), Set()))
-  def put[S](s: ParseState[S]) = Parser((_,_) => Commit(s,(),Set()))
-  def freshId = Parser((_,vs) => Pure(vs.fresh))
-  def rawSatisfy(p: Char => Boolean) = Parser((s, _) => {
+  def get: Parser[ParseState] = Parser((s:ParseState, _:Supply) => Pure(s))
+  def gets[A](f: ParseState => A): Parser[A] = Parser((s:ParseState,_:Supply) => Pure(f(s)))
+  def getSupply: Parser[Supply] = Parser((_:ParseState, vs:Supply) => Pure(vs))
+  def loc: Parser[Pos] = Parser((s:ParseState, _:Supply) => Pure(s.loc))
+  def modify(f: ParseState => ParseState) = Parser((s:ParseState,_:Supply) => Commit(f(s),(), Set()))
+  def put(s: ParseState) = Parser((_:ParseState,_:Supply) => Commit(s,(),Set()))
+  def freshId = Parser((_:ParseState,vs:Supply) => Pure(vs.fresh))
+  def rawSatisfy(p: Char => Boolean) = Parser((s:ParseState, _:Supply) => {
     val si = s.input
     if (s.offset == si.length) Fail(None, List(), Set())
     else {
@@ -62,8 +67,8 @@ object ParsingUtil {
     else Fail(None, List(), Set("end of input"))
   )
 
-  def warn(msg: Document) = Parser((s, _) => { println(msg.toString); Pure(()) })
-  def info(msg: Document) = Parser((s, _) => { println(msg.toString); Pure(()) })
+  def warn(msg: Document) = Parser((s:ParseState, _:Supply) => { println(msg.toString); Pure(()) })
+  def info(msg: Document) = Parser((s:ParseState, _:Supply) => { println(msg.toString); Pure(()) })
 
   def choice[A](xs: Parser[A]*) = xs.toList.foldRight[Parser[A]](empty)(_ | _)
   def assert(p: => Boolean): Parser[Unit] = if (p) unit(()) else empty
@@ -101,9 +106,9 @@ object ParsingUtil {
     _ <- modify(s => s.copy(bol = b)).when(old != b) // avoid committing if we haven't changed it
   } yield ()
 
-  private def pushContext(ctx: LayoutContext): Parser[Unit] = modify { s => s.copy(layoutStack = ctx :: s.layoutStack) }
+  private def pushContext(ctx: LayoutContext[S]): Parser[Unit] = modify { s => s.copy(layoutStack = ctx :: s.layoutStack) }
 
-  private def popContext(msg: String, f: LayoutContext => Boolean): Parser[Unit] = for {
+  private def popContext(msg: String, f: LayoutContext[S] => Boolean): Parser[Unit] = for {
     u <- get
     if !u.layoutStack.isEmpty
     l <- loc
@@ -166,7 +171,7 @@ object ParsingUtil {
   def layout: Parser[Token] = get.flatMap(s => whiteSpace(false, s.bol))
 
   def virtualLeftBrace(n: String): Parser[Unit] =
-    modify(s => s.copy(layoutStack = IndentedLayout(s.loc.column max s.depth, n) :: s.layoutStack))
+    modify(s => s.copy(layoutStack = IndentedLayout[S](s.loc.column max s.depth, n) :: s.layoutStack))
 
   def virtualRightBrace: Parser[Unit] = get.flatMap(s =>
     layout.flatMatch({
@@ -176,7 +181,7 @@ object ParsingUtil {
         sp <- get
         b <- sp.layoutEndsWith.wouldSucceed
         _ <- failUnless[Parser](b,"end of layout not found")
-      } yield raiseWhen[Parser](sp.layoutStack.isEmpty || sp.layoutStack.head.isInstanceOf[BracedLayout], sp.loc, "panic: incorrect layout context for virtual right brace") >>
+      } yield raiseWhen[Parser](sp.layoutStack.isEmpty || sp.layoutStack.head.isInstanceOf[BracedLayout[S]], sp.loc, "panic: incorrect layout context for virtual right brace") >>
               modify(_.copy(layoutStack = sp.layoutStack.tail)) // bol remains false
     }).attempt(
       s.layoutStack.collectFirst({
@@ -197,7 +202,7 @@ object ParsingUtil {
         layoutStack = BracedLayout(
           ld,
           rp.scope(rd),
-          Parser((s, _) => Fail(None,List(start.report("note: unmatched " + ld)), Set(rd))),
+          Parser((s: ParseState, _: Supply) => Fail(None,List(start.report("note: unmatched " + ld)), Set(rd))),
           // l => raise(start, "error: unmatched " + ld, List(l.report("note: expected corresponding " + rd + " here"))),
           rd
         ) :: s.layoutStack
@@ -221,7 +226,7 @@ object ParsingUtil {
            modify(_.copy(layoutStack = xs)) >>
            optionalSpace.skipOptional
         ) | missing
-      case stk => raise(s.loc, "panic: expected braced layout, but found: " + stk.mkString(",")) // , but found:" above nest(2, vsep(stk.map(text(_.toString)))))
+      case stk => raise[Parser](s.loc, "panic: expected braced layout, but found: " + stk.mkString(",")) // , but found:" above nest(2, vsep(stk.map(text(_.toString)))))
     }
   }
 
@@ -237,8 +242,8 @@ object ParsingUtil {
   def optionalSpace: Parser[Unit] = layout.flatMatch({
     case WhiteSpace => unit(())
     case Other => unit(())
-    case VSemi => Diagnostic.fail("vsemi in optional space")
-    case VBrace => Diagnostic.fail("vbrace in optional space")
+    case VSemi => Diagnostic.fail[Parser]("vsemi in optional space")
+    case VBrace => Diagnostic.fail[Parser]("vbrace in optional space")
   }) attempt "whitespace"
 
   def eof: Parser[Unit] = realEOF scope "eof" // (layout.collect({ case WhiteSpace | Other => ()}).attempt.skipOptional >> realEOF) scope "end of input"
@@ -352,4 +357,67 @@ object ParsingUtil {
   def prec: Parser[Int] = nat.filter(_ <= 10L).map(_.toInt) scope "precedence between 0 and 10"
   def underscore: Parser[Unit] = token((ch('_') >> notFollowedBy(tailChar)) attempt "underscore")
   */
+
+  sealed trait Op[T] extends Located {
+    def loc: Pos
+    def prec: Int
+    def assoc: Assoc
+    def apply(xs: List[T]): Parser[List[T]]
+  }
+
+  object Op {
+    def unary[T](l: Pos, p: Int, f: T => T) = new Op[T] {
+      def loc = l
+      def prec = p
+      def assoc = AssocL // permits repeated prefixes/postfixes, AssocN would disable
+      def apply(xs: List[T]): Parser[List[T]] = xs match {
+        case x :: xs => unit(f(x) :: xs)
+        case _       => empty[Parser]
+      }
+    }
+    def infix[T](l: Pos, p: Int, a: Assoc, f: (T,T) => T) = new Op[T] {
+      def loc = l
+      def prec = p
+      def assoc = a
+      def apply(xs: List[T]): Parser[List[T]] = xs match {
+        case x :: y :: xs => unit(f(y,x) :: xs)
+        case _ => empty[Parser]
+      }
+    }
+
+    def shuntingYard[T](pre: Parser[Op[T]], inpost: Parser[Op[T]], operand: Parser[T]): Parser[T] = {
+      def clear(l: Pos, p: Op[T], rators: List[Op[T]], rands: List[T]): Parser[T] = rators match {
+        case f::fs => p.prec ?|? f.prec match {
+          case LT => f(rands) flatMap { clear(l, p, fs, _) }
+          case EQ => (p.assoc, f.assoc) match {
+            case (AssocL, AssocL) => f(rands) flatMap { clear(l, p, fs, _) }
+            case (AssocR, AssocR) => postRator(l, p :: rators, rands)
+            case _ => raise(f.loc, "error: ambiguous operator of precedence " + p.prec,
+                       List(p.report("note: is incompatible with this operator (add parentheses)")))
+          }
+          case GT => postRator(l, p :: rators, rands)
+        }
+        case Nil => postRator(l, List(p), rands)
+      }
+
+      def finish(l : Pos, rators: List[Op[T]], rands: List[T]): Parser[T] = rators match {
+        case f :: fs => f(rands) flatMap (finish(l, fs, _))
+        case Nil => rands match {
+          case List(x) => unit(x)
+          case _ => fail("error: ill-formed expression")
+        }
+      }
+
+      def postRator(l : Pos, rators: List[Op[T]], rands: List[T]): Parser[T] =
+        operand.flatMap(rand => postRand(l, rators, rand :: rands)) |
+        pre.flatMap(clear(l, _, rators, rands)) |
+        finish(l, rators, rands)
+
+      def postRand(l : Pos, rators: List[Op[T]], rands: List[T]): Parser[T] =
+        inpost.flatMap(clear(l, _, rators, rands)) |
+        finish(l, rators, rands)
+
+      loc.flatMap(postRator(_, List(), List()))
+    }
+  }
 }
