@@ -1,8 +1,10 @@
 name := "scala-parsers"
 
-version := "0.1"
+version := "0.2-SNAPSHOT"
 
-scalaVersion := "2.10.3"
+scalaVersion := "2.11.1"
+
+crossScalaVersions := Seq("2.11.1", "2.10.4")
 
 description := "A Trifecta inspired parser in Scala."
 
@@ -20,15 +22,8 @@ scalacOptions ++=
       "-language:implicitConversions", "-language:higherKinds",
       "-language:existentials", "-language:postfixOps")
 
-javacOptions ++=
-  Seq("-Xlint:cast", "-Xlint:deprecation", "-Xlint:empty",
-      "-Xlint:finally", "-Xlint:fallthrough", "-Xlint:overrides")
-
 parallelExecution := true
 
 javacOptions += "-Xlint"
 
-scalacOptions ~= (so => (so filterNot Set("-unchecked", "-Xlint"))
-                    ++ Seq("-Ywarn-nullary-override", "-Ywarn-inaccessible"))
-
-libraryDependencies += "org.scalaz" %% "scalaz-core" % "7.0.2"
+libraryDependencies += "org.scalaz" %% "scalaz-core" % "7.0.6"
