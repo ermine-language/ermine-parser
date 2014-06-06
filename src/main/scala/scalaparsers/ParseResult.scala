@@ -24,30 +24,13 @@ case class Pure[+A](extract: A, last: Fail = Fail()) extends ParseResult[Nothing
 }
 
 /** A committed computation which ha manipulated the ParseState */
-final class Commit[S,+A](val s: ParseState[S], val extract: A, val expected: Set[String]) extends ParseResult[S,A] with Comonadic[({type L[+B] = Commit[S,B]})#L, A] with Located with Product with Serializable {
+case class Commit[S,+A](val s: ParseState[S], val extract: A, val expected: Set[String]) extends ParseResult[S,A] with Located with Product with Serializable {
   override def self = this
   def lift[B](b: Commit[S,B]) = b
   override def map[B](f: A => B)   = Commit(s, f(extract), expected)
   override def as[B](b: => B)      = Commit(s, b, expected)
   def extend[B](f: Commit[S,A] => B) = Commit(s, f(this), expected)
   def loc = s.loc
-
-  // TODO: remove these and the companion and reinstate case-hood when
-  // https://issues.scala-lang.org/browse/SI-8649 is fixed
-  override def canEqual(o: Any) = o.isInstanceOf[Commit[_,_]]
-  override def equals(o: Any) = o match {
-    case o: Commit[_,_] if o canEqual this =>
-      s == o.s && extract == o.extract && expected == o.expected
-  }
-  override def hashCode = runtime.ScalaRunTime._hashCode(this)
-}
-
-object Commit {
-  def apply[S, A](s: ParseState[S], extract: A, expected: Set[String]): Commit[S, A] =
-    new Commit(s, extract, expected)
-
-  def unapply[S, A](c: Commit[S, A]): Some[(ParseState[S], A, Set[String])] =
-    Some((c.s, c.extract, c.expected))
 }
 
 sealed trait ParseFailure extends ParseResult[Nothing,Nothing] {
