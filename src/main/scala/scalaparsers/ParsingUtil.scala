@@ -302,8 +302,8 @@ trait Parsing[S] {
     val oneToNine = satisfy("123456789" contains (_:Char))
     for {
       y <- ch('@') >> nat_ << ch('/')
-      m <- nat_.filter(1 to 12 contains) << ch('/')
-      d <- nat_.filter(1 to 31 contains)
+      m <- nat_.filter(1L to 12L contains) << ch('/')
+      d <- nat_.filter(1L to 31L contains)
     } yield {
       import java.util.Calendar
       val c = Calendar getInstance (TimeZone getTimeZone "GMT")

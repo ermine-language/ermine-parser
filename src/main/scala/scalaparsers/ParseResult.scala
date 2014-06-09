@@ -24,7 +24,7 @@ case class Pure[+A](extract: A, last: Fail = Fail()) extends ParseResult[Nothing
 }
 
 /** A committed computation which ha manipulated the ParseState */
-case class Commit[S,+A](s: ParseState[S], extract: A, expected: Set[String]) extends ParseResult[S,A] with Comonadic[({type L[+B] = Commit[S,B]})#L, A] with Located {
+case class Commit[S,+A](s: ParseState[S], extract: A, expected: Set[String]) extends ParseResult[S,A]/*TODO uncomment after https://issues.scala-lang.org/browse/SI-8649 fix: with Comonadic[({type L[+B] = Commit[S,B]})#L, A]*/ with Located {
   override def self = this
   def lift[B](b: Commit[S,B]) = b
   override def map[B](f: A => B)   = Commit(s, f(extract), expected)

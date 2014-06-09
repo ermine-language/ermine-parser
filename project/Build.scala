@@ -9,8 +9,9 @@ object ParserBuild extends Build {
 
   private lazy val projectSettings =
     Defaults.defaultSettings ++ Seq[SettingsDefinition](
-        scalaVersion := "2.10.2",
-        compileTestRuntime(sc => classpathConfiguration in sc := sc)
+        scalaVersion := "2.11.1"
+       ,crossScalaVersions := Seq("2.11.1", "2.10.4")
+       ,compileTestRuntime(sc => classpathConfiguration in sc := sc)
        ,mainClass in (Compile, run) := Some("com.clarifi.reporting.ermine.session.Console")
        ,compileTestRuntime(sco => allUnmanagedResourceDirectories in sco <<=
           Defaults.inDependencies(unmanagedResourceDirectories in sco, _ => Seq.empty)
