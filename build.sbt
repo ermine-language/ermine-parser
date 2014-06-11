@@ -1,6 +1,6 @@
 name := "scala-parsers"
 
-version := "0.2-SNAPSHOT"
+version := "0.2"
 
 scalaVersion := "2.11.1"
 
@@ -27,3 +27,5 @@ parallelExecution := true
 javacOptions += "-Xlint"
 
 libraryDependencies += "org.scalaz" %% "scalaz-core" % "7.0.6"
+
+initialCommands in console := "import scalaz._, Scalaz._; import scalaparsers._; import com.clarifi.screening.ScreenParser._"
