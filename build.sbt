@@ -2,15 +2,17 @@ name := "scala-parsers"
 
 version := "0.2"
 
-scalaVersion := "2.11.1"
+scalaVersion := "2.11.2"
 
-crossScalaVersions := Seq("2.11.1", "2.10.4")
+crossScalaVersions := Seq("2.11.2", "2.10.4")
 
 description := "A Trifecta inspired parser in Scala."
 
-licenses += ("BSD Simplified", url("https://github.com/ermine-language/ermine-legacy/blob/master/LICENSE"))
+licenses += ("BSD Simplified", url("https://github.com/ermine-language/ermine-parser/blob/master/LICENSE"))
 
-seq(bintraySettings:_*)
+homepage := Some(url("https://github.com/ermine-language/ermine-parser"))
+
+bintraySettings
 
 bintray.Keys.bintrayOrganization in bintray.Keys.bintray := Some("ermine")
 
@@ -28,4 +30,4 @@ javacOptions += "-Xlint"
 
 libraryDependencies += "org.scalaz" %% "scalaz-core" % "7.0.6"
 
-initialCommands in console := "import scalaz._, Scalaz._; import scalaparsers._; import com.clarifi.screening.ScreenParser._"
+initialCommands in console := "import scalaz._, Scalaz._; import scalaparsers._"
