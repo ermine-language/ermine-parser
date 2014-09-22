@@ -106,9 +106,9 @@ abstract class Relocatable[T <: Located] {
   def setLoc(t: T, loc: Loc): T
 }
 
-//object Relocatable {
+// TODO: replace the setLoc invocation (see e05bff2) and uncomment
+// object Relocatable {
 //  def preserveLoc[A <: Located, B<:Located:Relocatable](sub: Map[A,B]): PartialFunction[A,B] = {
-//    case x if sub.contains(x) => sub(x).setLoc(x.loc)
+//    case x if sub.contains(x) => setLoc(sub(x),x.loc)
 //  }
-//}
-
+// }
