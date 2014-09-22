@@ -269,9 +269,9 @@ trait Parsing[S] {
   private def charEsc      = choice(charEscMagic.toSeq.map { case (c,d) => ch(c) as d } :_*)
   private def escapeCode   = (charControl | charEsc) scope "escape code" // TODO: charNum, charAscii
   private def charEscape   = ch('\\') >> escapeCode
-  private def charLetter   = satisfy(c => (c != '\'') && (c != '\\') && (c > '\026'))
+  private def charLetter   = satisfy(c => (c != '\'') && (c != '\\') && (c > '\u0016'))
   private def charChar     = (charLetter | charEscape) scope "character literal character"
-  private def stringLetter = satisfy(c => (c != '"') && (c != '\\') && (c > '\026'))
+  private def stringLetter = satisfy(c => (c != '"') && (c != '\\') && (c > '\u0016'))
   private def stringEscape = ch('\\') >> (
     (simpleSpace.skipSome >> (ch('\\') scope "end of string gap")).as(None) | // escape gap
     ch('&').as(None) |                                                  // empty escape
