@@ -1,6 +1,6 @@
 package scalaparsers
 
-sealed abstract class Result[+S,+A] extends Functorial[({type F[+X] = Result[S,X]})#F,A] {
+sealed abstract class Result[+S,+A] extends Functorial[Result[S,+?],A] {
   def self = this
 }
 

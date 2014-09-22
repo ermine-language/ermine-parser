@@ -15,7 +15,7 @@ import Supply._
   *
   * @author EAK
   */
-abstract class Parser[S, +A] extends MonadicPlus[({type L[+B] = Parser[S,B]})#L,A] { that =>
+abstract class Parser[S, +A] extends MonadicPlus[Parser[S,+?],A] { that =>
   def self = that
   def apply(s: ParseState[S], vs: Supply): Trampoline[ParseResult[S,A]]
   def run(s: ParseState[S], vs: Supply): Either[Err, (ParseState[S], A)] = apply(s,vs).run match {

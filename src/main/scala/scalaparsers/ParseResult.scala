@@ -4,13 +4,13 @@ import scalaparsers.Document.{ fillSep, text, punctuate, nest, line, oxford }
 import scala.collection.immutable.List
 import scalaz.Functor
 
-sealed trait ParseResult[+S,+A] extends Functorial[({type L[+B]  = ParseResult[S,B]})#L, A] {
+sealed trait ParseResult[+S,+A] extends Functorial[ParseResult[S,+?], A] {
   def self = this
 }
 
 object ParseResult {
-//  implicit def parseResultFunctor: Functor[({type L[S,B] = ParseResult[S, B]})#L] = new Functor[({type L[B] = ParseResult[S, B]})#L] {
-//    def map[A,B](p: ParseResult[A])(f: A => B) = p map f
+//  implicit def parseResultFunctor: Functor[ParseResult[S,?]] = new Functor[ParseResult[S, ?]] {
+//    def map[A,B](p: ParseResult[S, A])(f: A => B) = p map f
 //  }
 }
 
