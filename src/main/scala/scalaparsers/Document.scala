@@ -59,7 +59,7 @@ abstract class Document {
       case List() => true
       case (_, _, DocNil) :: z              => fits(w, z)
       case (i, b, DocCons(h, t)) :: z       => fits(w, (i,b,h) :: (i,b,t) :: z)
-      case (_, _, DocText(t)) :: z          => fits(w - t.length(), z)
+      case (_, _, DocText(t)) :: z          => if (t == null) fits(w, z) else fits(w - t.length(), z)
       case (i, b, DocNest(ii, d)) :: z      => fits(w, (i + ii, b, d) :: z)
       case (_, false, DocBreak(true)) :: z  => fits(w - 1, z)
       case (_, false, DocBreak(false)) :: z => fits(w, z)
@@ -78,7 +78,7 @@ abstract class Document {
         fmt(k, (i, b, h) :: (i, b, t) :: z)
       case (i, _, DocText(t)) :: z =>
         writer write t
-        fmt(k + t.length(), z)
+        if (t == null) fmt(k, z) else fmt(k + t.length(), z)
       case (i, b, DocNest(ii, d)) :: z =>
         fmt(k, (i + ii, b, d) :: z)
       case (i, true, DocBreak(_)) :: z =>
