@@ -9,9 +9,9 @@ sealed trait ParseResult[+S,+A] extends Functorial[ParseResult[S,+?], A] {
 }
 
 object ParseResult {
-//  implicit def parseResultFunctor: Functor[ParseResult[S,?]] = new Functor[ParseResult[S, ?]] {
-//    def map[A,B](p: ParseResult[S, A])(f: A => B) = p map f
-//  }
+  implicit def parseResultFunctor[S]: Functor[ParseResult[S,?]] = new Functor[ParseResult[S, ?]] {
+    def map[A,B](p: ParseResult[S, A])(f: A => B) = p map f
+  }
 }
 
 /** A pure computation that hasn't consumed any input, including a list of options that could have made it eat more */
