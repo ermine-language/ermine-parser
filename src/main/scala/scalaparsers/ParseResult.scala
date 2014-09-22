@@ -24,13 +24,25 @@ case class Pure[+A](extract: A, last: Fail = Fail()) extends ParseResult[Nothing
 }
 
 /** A committed computation which ha manipulated the ParseState */
-case class Commit[S,+A](s: ParseState[S], extract: A, expected: Set[String]) extends ParseResult[S,A]/*TODO uncomment after https://issues.scala-lang.org/browse/SI-8649 fix: with Comonadic[({type L[+B] = Commit[S,B]})#L, A]*/ with Located {
+case class Commit[S,+A](s: ParseState[S], extract: A, expected: Set[String]) extends ParseResult[S,A] with Located {
   override def self = this
   def lift[B](b: Commit[S,B]) = b
   override def map[B](f: A => B)   = Commit(s, f(extract), expected)
   override def as[B](b: => B)      = Commit(s, b, expected)
   def extend[B](f: Commit[S,A] => B) = Commit(s, f(this), expected)
   def loc = s.loc
+}
+
+object Commit {
+  // TODO move the Comonadic type below back to Commit's supertype list when
+  // https://issues.scala-lang.org/browse/SI-8649 is fixed, and remove
+  // this implicit class
+  implicit final class commitComonadic[S, +A](val self: Commit[S, A])
+      extends Comonadic[Commit[S,+?], A] {
+    override def extract = self.extract
+    override def extend[B](f: Commit[S,A] => B) = self extend f
+    override def lift[B](b: Commit[S,B]) = self lift b
+  }
 }
 
 sealed trait ParseFailure extends ParseResult[Nothing,Nothing] {
