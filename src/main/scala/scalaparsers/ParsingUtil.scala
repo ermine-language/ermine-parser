@@ -210,8 +210,6 @@ trait Parsing[S] {
     )
   } yield ()
 
-  //def leftLet      = left(keyword("let"),"let", rawKeyword("in"), "in")
-  //def leftCase     = left(keyword("case"),"case", rawKeyword("of"), "of")
   def leftToken(ld: String, rd: String) = left(token(ld), "'" + ld + "'", rawWord(rd), "'" + rd + "'")
   def leftBrace    = leftToken("{","}")
   def leftCurlyBanana = leftToken("{|","|}")

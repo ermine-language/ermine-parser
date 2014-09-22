@@ -51,7 +51,7 @@ sealed trait ParseFailure extends ParseResult[Nothing,Nothing] {
 }
 
 /** A recoverable error that hasn't consumed any input */
-case class Fail (msg: Option[Document] = None, aux: List[Document] = List(), expected: Set[String] = Set()) extends ParseFailure {
+case class Fail(msg: Option[Document] = None, aux: List[Document] = List(), expected: Set[String] = Set()) extends ParseFailure {
   override def map[B](f: Nothing => B) = this
   def ++(m: Fail): Fail = Fail(
     m.msg orElse msg,
