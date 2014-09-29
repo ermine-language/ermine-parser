@@ -32,6 +32,11 @@ parallelExecution := true
 
 javacOptions += "-Xlint"
 
-libraryDependencies += "org.scalaz" %% "scalaz-core" % "7.0.6"
+val scalazVersion = "7.0.6"
+
+libraryDependencies ++= Seq(
+  "org.scalaz" %% "scalaz-core" % scalazVersion,
+  "org.scalaz" %% "scalaz-scalacheck-binding" % scalazVersion % "test"
+)
 
 initialCommands in console := "import scalaz._, Scalaz._; import scalaparsers._"
