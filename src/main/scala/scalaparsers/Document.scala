@@ -17,6 +17,8 @@ object DocText{
   def apply(txt:String):DocText = new DocText(if(txt == null) "(null)" else txt)
   def unapply(d: DocText) : Option[String] = Some(d.txt)
 }
+
+case class LazyDocText(txtFn: (() => String)) extends Document
 case class DocGroup(doc: Document) extends Document
 case class DocNest(indent: Int, doc: Document) extends Document
 case class DocCons(hd: Document, tl: Document) extends Document
@@ -60,6 +62,7 @@ abstract class Document {
       case (_, _, DocNil) :: z              => fits(w, z)
       case (i, b, DocCons(h, t)) :: z       => fits(w, (i,b,h) :: (i,b,t) :: z)
       case (_, _, DocText(t)) :: z          => if (t == null) fits(w, z) else fits(w - t.length(), z)
+      case (_, _, LazyDocText(t)) :: z      => if (t == null) fits(w, z) else fits(w - t().length(), z)
       case (i, b, DocNest(ii, d)) :: z      => fits(w, (i + ii, b, d) :: z)
       case (_, false, DocBreak(true)) :: z  => fits(w - 1, z)
       case (_, false, DocBreak(false)) :: z => fits(w, z)
@@ -79,6 +82,9 @@ abstract class Document {
       case (i, _, DocText(t)) :: z =>
         writer write t
         if (t == null) fmt(k, z) else fmt(k + t.length(), z)
+      case (i, _, LazyDocText(t)) :: z =>
+        writer write t()
+        fmt(k + t().length(), z)
       case (i, b, DocNest(ii, d)) :: z =>
         fmt(k, (i + ii, b, d) :: z)
       case (i, true, DocBreak(_)) :: z =>
@@ -129,6 +135,8 @@ object Document {
 
   /** A document consisting of some text literal */
   implicit def text(s: String): Document = DocText(s)
+  
+  def lazyText(textFn: (() => String)): Document = LazyDocText(textFn)
 
   /**
    * A group, whose components will either be printed with all breaks
