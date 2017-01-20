@@ -1,6 +1,6 @@
 name := "scala-parsers"
 
-version := "0.2.1"
+version := "0.2.2"
 
 scalaVersion := "2.11.2"
 
