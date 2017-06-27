@@ -285,7 +285,7 @@ trait Parsing[S] {
   private def charLetter   = satisfy(c => (c != '\'') && (c != '\\') && (c > '\u0016'))
   private def charChar     = (charLetter | charEscape) scope "character literal character"
   private def stringLetter = satisfy(c => (c != '"') && (c != '\\') && (c > '\u0016'))
-  private def stringEscape = ch('\\') >> (
+  private def stringEscape = satisfy(_ == '\\') >> (
     (simpleSpace.skipSome >> (ch('\\') scope "end of string gap")).as(None) | // escape gap
     ch('&').as(None) |                                                  // empty escape
     escapeCode.map(Some(_))
@@ -302,7 +302,7 @@ trait Parsing[S] {
         .slice
         .interspersedWith(stringEscape.map(_.fold("")(_ toString)))
         .map(_ mkString)
-        .between('"','"')
+        .between('"','"' scope "end of string literal")
         .scope("string literal"))
 
   /** Format a string back to its equivalent literal form. */
