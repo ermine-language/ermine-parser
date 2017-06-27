@@ -89,7 +89,7 @@ case class Pos(fileName: String, current: String, line: Int, column: Int, ending
   override def report(msg: Document, rest: Document*): Document = vsep(
     (fileName :: ":" :: line.toString :: ":" :: column.toString :: ":" :+: msg) ::
     (current :: text(if (ending) "<EOF>" else "")) ::
-    Document.lazyText(Pos.spacing(column - 1)) :: text("^") ::
+    (Document.lazyText(Pos.spacing(column - 1)) :: text("^")) ::
     rest.toList
   )
 
