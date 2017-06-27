@@ -61,6 +61,31 @@ case class Pos(fileName: String, current: String, line: Int, column: Int, ending
     else if (c == '\t') Pos(fileName, current, line, column + (8 - column % 8), ending)
     else Pos(fileName, current, line, column + 1, ending)
 
+  def bumps(s: String, i: String, o: Int) = {
+    @annotation.tailrec
+    def loop(s: String, ln: Int, cl: Int, grab: Boolean): (Int, Int, Boolean) =
+      if (s.isEmpty) (ln, cl, grab)
+      else s.charAt(0) match {
+        case '\n' => loop(s.tail, ln+1, 1, true)
+        case '\t' => loop(s.tail, ln, cl + 8 - cl%8, grab)
+        case _ =>
+          val (pre, post) = s.span(c => c != '\n' && c != '\t')
+          loop(post, ln, cl + pre.length, grab)
+      }
+
+    val (ln, cl, grabNewLine) = loop(s, line, column, false)
+
+    val (cur, end) =
+      if (grabNewLine) {
+        val ix = i.indexOf('\n', o)
+        if (ix == -1) (i substring o, true)
+        else (i substring (o, ix), false)
+      } else (current, ending)
+
+    Pos(fileName, cur, ln, cl, end)
+  }
+
+
   override def report(msg: Document, rest: Document*): Document = vsep(
     (fileName :: ":" :: line.toString :: ":" :: column.toString :: ":" :+: msg) ::
     (current :: text(if (ending) "<EOF>" else "")) ::

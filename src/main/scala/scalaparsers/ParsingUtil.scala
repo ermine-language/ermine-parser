@@ -62,6 +62,21 @@ trait Parsing[S] {
   })
   def satisfy(p: Char => Boolean) = rawSatisfy(p) << setBol(false)
 
+  // A fused operation for skipping 0 or more characters that match a predicate.
+  // This will set bol to false like satisfy, so it is probably best to only
+  // use this to skip in situations where layout will not be relevant.
+  def skipSatisfy(p: Char => Boolean) = Parser((s:ParseState, _:Supply) => {
+    val si = s.input
+    val so = s.offset
+    if (so < si.length) {
+      val k = si.indexWhere(c => !p(c), so)
+      if (k > so) {
+        Commit(s.copy(loc = s.loc.bumps(si.substring(so,k),si,k), offset = k, bol = false), (), Set())
+      }
+      else Pure(())
+    } else Pure(())
+  })
+
   def realEOF: Parser[Unit] = Parser((s, _) =>
     if (s.offset == s.input.length) Pure(())
     else Fail(None, List(), Set("end of input"))
@@ -281,10 +296,14 @@ trait Parsing[S] {
   def charLiteral = token(charChar.between('\'','\'') scope "character literal")
 
   /** token parser for parsing a string literal */
-  // def stringLiteral: Parser[String] = satisfy('"' != _).skipMany.slice.between('"', '"')
-  def stringLiteral: Parser[String] = token(stringChar.many.between('"','"').map(
-    _.sequence[Option,Char].getOrElse(List()).mkString
-  ) scope "string literal")
+  def stringLiteral : Parser[String] =
+    token(
+      skipSatisfy(c => c != '"' && c != '\\' && c > '\u0016')
+        .slice
+        .interspersedWith(stringEscape.map(_.fold("")(_ toString)))
+        .map(_ mkString)
+        .between('"','"')
+        .scope("string literal"))
 
   /** Format a string back to its equivalent literal form. */
   def inverseStringLiteral(s: String): String =

@@ -68,6 +68,8 @@ trait Alternating[T[+_],+A] extends Applied[T,A] with Filtered[T,A] {
   def sepEndBy(sep: T[Any]): T[List[A]] = sepEndBy1(sep) orElse List()
   def skipSepEndBy1(sep: T[Any]): T[Unit] = >>((sep >> skipSepEndBy(sep)) orElse (()))
   def skipSepEndBy(sep: T[Any]): T[Unit] = skipSepEndBy1(sep) orElse (())
+  def interspersedWith[B>:A](sep: T[B]): T[List[B]] = interspersedWith1(sep) orElse List()
+  def interspersedWith1[B>:A](sep: T[B]): T[List[B]] = map2(sep.map2(self)(List(_,_)).many)((x,xss) => x :: xss.flatten)
 }
 
 // technically these are mostly semigroupoid-like structures, because we don't offer unit directly
