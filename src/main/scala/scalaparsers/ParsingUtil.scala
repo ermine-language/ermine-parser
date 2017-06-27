@@ -69,7 +69,7 @@ trait Parsing[S] {
     val si = s.input
     val so = s.offset
     if (so < si.length) {
-      val k = si.indexWhere(c => !p(c), so)
+      val k = si.indexWhere(c => !p(c), so) match { case -1 => si.length; case n => n }
       if (k > so) {
         Commit(s.copy(loc = s.loc.bumps(si.substring(so,k),si,k), offset = k, bol = false), (), Set())
       }
