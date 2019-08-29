@@ -4,10 +4,6 @@ import scalaparsers._
 
 //import ParsingUtil._
 import scala.collection.immutable.List
-import scala.collection.immutable.TreeSet
-import scalaz.{ Name => _, _ }
-import scalaz.Scalaz._
-import scalaz.Lens._
 
 /** Used to track the current indentation level
   *

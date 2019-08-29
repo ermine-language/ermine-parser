@@ -2,11 +2,10 @@ package scalaparsers
 
 import Document.{ text }
 import scalaz._
-import scalaz.Free.{ Return, suspend }
+import scalaz.Free.{ pure, suspend }
 import scalaz.Scalaz._
 import scala.collection.immutable.List
 import Diagnostic._
-import java.lang.Character._
 import Ordering._
 import scalaz.Ordering.{LT, GT, EQ}
 
@@ -18,7 +17,7 @@ trait Parsing[S] {
   type ParseState = scalaparsers.ParseState[S]
 
   def unit[A](a: A): Parser[A] = new Parser[A] {
-    def apply(s: ParseState, vs: Supply) = suspend(Return(Pure(a)))
+    def apply(s: ParseState, vs: Supply) = suspend(pure(Pure(a)))
     override def map[B](f: A => B) = unit(f(a))
     override def flatMap[B](f: A => Parser[B]) = f(a)
   }
@@ -35,7 +34,7 @@ trait Parsing[S] {
 
   implicit def parserMonad: Monad[Parser] = new Monad[Parser] {
     def point[A](a: => A) = new Parser[A] {
-      def apply(s: ParseState, vs: Supply) = suspend(Return(Pure(a)))
+      def apply(s: ParseState, vs: Supply) = suspend(Free.pure(Pure(a)))
       override def map[B](f : A => B) = pure(f(a))
     }
     override def map[A,B](m: Parser[A])(f: A => B) = m map f
@@ -105,7 +104,7 @@ trait Parsing[S] {
   implicit def ch(c: Char): Parser[Char] = stillOnside >> rawCh(c) << setBol(false)
   def rawNewline = rawSatisfy(_ == '\n') scope "newline"
   // def tab = rawSatisfy(_ == '\t') scope "tab"
-  def rawWord(s: String): Parser[String] = s.toList.traverse[Parser,Char](ch(_)) attempt ('"'+s+'"') as s
+  def rawWord(s: String): Parser[String] = s.toList.traverse[Parser,Char](ch(_)) attempt ('"'.toString + s + '"'.toString) as s
   implicit def word(s: String): Parser[String] = stillOnside >> rawWord(s) << setBol(false)
 
   def upper  = satisfy(_.isUpper) scope "uppercase letter"
@@ -121,16 +120,8 @@ trait Parsing[S] {
     _ <- modify(s => s.copy(bol = b)).when(old != b) // avoid committing if we haven't changed it
   } yield ()
 
-  private def pushContext(ctx: LayoutContext[S]): Parser[Unit] = modify { s => s.copy(layoutStack = ctx :: s.layoutStack) }
 
-  private def popContext(msg: String, f: LayoutContext[S] => Boolean): Parser[Unit] = for {
-    u <- get
-    if !u.layoutStack.isEmpty
-    l <- loc
-    _ <- put(u.copy(layoutStack = u.layoutStack.tail))
-  } yield ()
-
-              // TODO: properly parse and check for operators that start with --
+  // TODO: properly parse and check for operators that start with --
   private def comment: Parser[Unit] = rawWord("--").attempt >> rawSatisfy(_ != '\n').skipMany >> (rawNewline | realEOF) >> unit(())
   private def blockComment: Parser[Boolean] = {
     def restComment(hadnl: Boolean): Parser[Boolean] =
@@ -284,13 +275,11 @@ trait Parsing[S] {
   private def charEscape   = ch('\\') >> escapeCode
   private def charLetter   = satisfy(c => (c != '\'') && (c != '\\') && (c > '\u0016'))
   private def charChar     = (charLetter | charEscape) scope "character literal character"
-  private def stringLetter = satisfy(c => (c != '"') && (c != '\\') && (c > '\u0016'))
   private def stringEscape = satisfy(_ == '\\') >> (
     (simpleSpace.skipSome >> (ch('\\') scope "end of string gap")).as(None) | // escape gap
     ch('&').as(None) |                                                  // empty escape
     escapeCode.map(Some(_))
   )
-  private def stringChar = (stringLetter.map(Some(_)) | stringEscape) scope "string literal character"
 
   /** token parser for parsing a character literal */
   def charLiteral = token(charChar.between('\'','\'') scope "character literal")
@@ -316,7 +305,6 @@ trait Parsing[S] {
   def doubleLiteral: Parser[Double] = token(doubleLiteral_)
 
   def dateLiteral_ = {
-    val oneToNine = satisfy("123456789" contains (_:Char))
     for {
       y <- ch('@') >> nat_ << ch('/')
       m <- nat_.filter(1L to 12L contains) << ch('/')
@@ -339,8 +327,8 @@ trait Parsing[S] {
   def identTail: Parser[Unit] = tailChar.skipMany
   def rawIdentTail: Parser[Unit] = rawTailChar.skipMany
 
-  val nonopChars = "()[]{};,\"".sorted.toArray[Char]
-  val opChars = ":!#$%&*+./<=>?@\\^|-~'`".sorted.toArray[Char]
+  val nonopChars = "()[]{};,\"".toSeq.sorted.toArray[Char]
+  val opChars = ":!#$%&*+./<=>?@\\^|-~'`".toSeq.sorted.toArray[Char]
   def existsIn(chs: Array[Char], c: Char): Boolean =
     java.util.Arrays.binarySearch(chs, c) >= 0
 //  def isOpChar(c: Char) =

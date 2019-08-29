@@ -54,7 +54,7 @@ abstract class Document {
    * @param width  ...
    * @param writer ...
    */
-  def format(width: Int, writer: Writer) {
+  def format(width: Int, writer: Writer): Unit = {
 
     def fits(w: Int, state: List[FmtState]): Boolean = state match {
       case _ if w < 0 => false
@@ -177,7 +177,7 @@ object Document {
     case _ => fillSep(punctuate(",", xs.init)) :: "," :+: andOr :+: xs.last
   }
 
-  def spaces(writer: Writer, n: Int) {
+  def spaces(writer: Writer, n: Int): Unit = {
     var rem = n
     while (rem >= 16) { writer write "                "; rem -= 16 }
     if (rem >= 8)     { writer write "        "; rem -= 8 }

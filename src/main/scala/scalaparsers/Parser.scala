@@ -1,15 +1,13 @@
 package scalaparsers
 
 
-import scalaparsers.Document.{ text, fillSep }
+import scalaparsers.Document.{ text }
 
 import scala.collection.immutable.List
-import scalaz.{ Monad }
 import scalaz.Scalaz._
-import scalaz.Free.{ suspend, Return, Trampoline }
+import scalaz.Free.{ suspend, pure, Trampoline }
 import scalaz.Ordering._
 
-import Supply._
 
 /** A parser with a nice error handling
   *
@@ -66,7 +64,7 @@ abstract class Parser[S, +A] extends MonadicPlus[Parser[S,+?],A] { that =>
         case Fail(e, aux, ys) => Err.report(t.loc, e, aux, xs ++ ys)
         case r => r
       }
-      case r : ParseFailure => suspend(Return(r))
+      case r : ParseFailure => suspend(pure(r))
     }
   }
 
@@ -93,7 +91,7 @@ abstract class Parser[S, +A] extends MonadicPlus[Parser[S,+?],A] { that =>
         }
         case r => r
       }
-      case r => suspend(Return(r))
+      case r => suspend(pure(r))
     }
   }
 
@@ -106,7 +104,7 @@ abstract class Parser[S, +A] extends MonadicPlus[Parser[S,+?],A] { that =>
         case Pure(a, ep) => Pure(a, e ++ ep)
         case r => r
       }
-      case r => suspend(Return(r))
+      case r => suspend(pure(r))
     }
   }
   def orElse[B >: A](b: => B) = new Parser[S,B] {
@@ -149,7 +147,7 @@ abstract class Parser[S, +A] extends MonadicPlus[Parser[S,+?],A] { that =>
         case Fail(ep, auxp, ys)  => Fail(ep orElse e, if (ep.isDefined) auxp else aux, xs ++ ys)
         case r => r
       }
-      case r => suspend(Return(r))
+      case r => suspend(pure(r))
     }
   }
   def slice = new Parser[S,String] {
@@ -165,6 +163,6 @@ abstract class Parser[S, +A] extends MonadicPlus[Parser[S,+?],A] { that =>
 
 object Parser {
   def apply[A,S](f: (ParseState[S], Supply) => ParseResult[S,A]) = new Parser[S,A] {
-    def apply(s: ParseState[S], vs: Supply) = suspend(Return(f(s, vs)))
+    def apply(s: ParseState[S], vs: Supply) = suspend(pure(f(s, vs)))
   }
 }
