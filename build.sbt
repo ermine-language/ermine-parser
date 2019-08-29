@@ -1,42 +1,31 @@
-name := "scala-parsers"
-
-version := "0.2.3"
-
-scalaVersion := "2.11.2"
-
-crossScalaVersions := Seq("2.11.2", "2.10.4")
-
-description := "A Trifecta inspired parser in Scala."
-
-licenses += ("BSD Simplified", url("https://github.com/ermine-language/ermine-parser/blob/master/LICENSE"))
-
-homepage := Some(url("https://github.com/ermine-language/ermine-parser"))
-
-bintrayOrganization := Some("ermine")
-
-bintrayReleaseOnPublish in ThisBuild := false
-
-publishMavenStyle := true
-
-scalacOptions ++=
-  Seq("-encoding", "UTF-8", "-Yrecursion", "50", "-deprecation",
-      "-unchecked", "-Xlint", "-feature",
-      "-language:implicitConversions", "-language:higherKinds",
-      "-language:existentials", "-language:postfixOps")
-
-resolvers += Resolver.bintrayRepo("non", "maven") // for kind-projector
-
-addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.5.2")
-
-parallelExecution := true
-
-javacOptions += "-Xlint"
+ThisBuild / version := "0.2.3"
+ThisBuild / scalaVersion := "2.11.12"
 
 val scalazVersion = "7.0.6"
+lazy val root = (project in file("."))
+  .settings(
+    name := "scala-parsers",
+    description := "A Trifecta inspired parser in Scala.",
+    licenses += ("BSD Simplified", url("https://github.com/ermine-language/ermine-parser/blob/master/LICENSE")),
+    homepage := Some(url("https://github.com/ermine-language/ermine-parser")),
+    bintrayOrganization := Some("ermine"),
+    ThisBuild / bintrayReleaseOnPublish := false,
+    publishMavenStyle := true,
+    scalacOptions ++=
+      Seq("-encoding", "UTF-8", "-Yrecursion", "50", "-deprecation",
+          "-unchecked", "-Xlint", "-feature",
+          "-language:implicitConversions", "-language:higherKinds",
+          "-language:existentials", "-language:postfixOps"),
+          
+    // for kind-projector
+    resolvers += Resolver.bintrayRepo("non", "maven"),
+    addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.10.3"),
 
-libraryDependencies ++= Seq(
-  "org.scalaz" %% "scalaz-core" % scalazVersion,
-  "org.scalaz" %% "scalaz-scalacheck-binding" % scalazVersion % "test"
-)
-
-initialCommands in console := "import scalaz._, Scalaz._; import scalaparsers._"
+    parallelExecution := true,
+    javacOptions += "-Xlint",
+    libraryDependencies ++= Seq(
+      "org.scalaz" %% "scalaz-core" % scalazVersion,
+      "org.scalaz" %% "scalaz-scalacheck-binding" % scalazVersion % "test"
+    ),
+    console / initialCommands := "import scalaz._, Scalaz._; import scalaparsers._",
+  )
