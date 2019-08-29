@@ -1,8 +1,12 @@
 ThisBuild / version := "0.2.3"
 // ThisBuild / scalaVersion := "2.11.12"
-ThisBuild / scalaVersion := "2.13.0"
+// ThisBuild / scalaVersion := "2.13.0"
+ThisBuild / scalaVersion := "2.12.9"
 
-val scalazVersion = "7.2.28"
+// val scalazVersion = "7.2.28"
+// val scalazVersion = "7.1.17"
+val scalazVersion = "7.0.9"
+
 lazy val root = (project in file("."))
   .settings(
     name := "scala-parsers",
@@ -26,7 +30,7 @@ lazy val root = (project in file("."))
     javacOptions += "-Xlint",
     libraryDependencies ++= Seq(
       "org.scalaz" %% "scalaz-core" % scalazVersion,
-      // "org.scalaz" %% "scalaz-scalacheck-binding" % scalazVersion % "test"
+      "org.scalaz" %% "scalaz-scalacheck-binding" % scalazVersion % "test"
     ),
     console / initialCommands := "import scalaz._, Scalaz._; import scalaparsers._",
   )

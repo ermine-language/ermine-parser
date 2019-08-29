@@ -3,3 +3,4 @@ target/
 .ermine_history
 .metals
 .bloop
+.idea

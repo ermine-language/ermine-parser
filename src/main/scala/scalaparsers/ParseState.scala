@@ -1,8 +1,5 @@
 package scalaparsers
 
-import scalaparsers._
-
-//import ParsingUtil._
 import scala.collection.immutable.List
 
 /** Used to track the current indentation level
